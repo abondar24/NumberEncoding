@@ -32,7 +32,6 @@ public class Encoder {
         this.dictionary = dictionary;
         this.encodedDictionary = encodeDictionary(this.dictionary);
         this.MIN_CODE_LEN = calcMinCodeLen(dictionary);
-      //  encodedDictionary.forEach((k,v)->System.out.println(k+":"+v));
 
     }
 
@@ -41,15 +40,16 @@ public class Encoder {
         return codes;
     }
 
-    public List<String> doEncoding() {
-        List<String> results = new ArrayList<>();
+    public void doEncoding() {
         numbers.forEach(num -> {
+            List<String> results = new ArrayList<>();
             if (checkNumberFormat(num)) {
                 getCodedNumbers(num);
             }
+            results.forEach(System.out::println);
         });
 
-        return results;
+
     }
 
     /**
@@ -98,7 +98,7 @@ public class Encoder {
     }
 
 
-    private void getCodedNumbers(String number) {
+    public List<String> getCodedNumbers(String number) {
         String cleanNumber = number;
         if (codeCheck('-', cleanNumber)) {
             cleanNumber = cleanNumber.replace("-", "");
@@ -109,34 +109,121 @@ public class Encoder {
         }
 
 
-             List<Combo> combos = getNumberCombos(cleanNumber);
+        List<Combo> combos = getNumberCombos(cleanNumber);
 
         combos.forEach(this::getCities);
 
-        combos=combos.stream()
-                .filter(c->!c.getCities().isEmpty())
+        combos = combos.stream()
+                .filter(c -> !c.getCities().isEmpty())
                 .collect(Collectors.toList());
 
-        List<StringBuilder> sbList = new ArrayList<>();
-        combos.forEach(c->{
-            if (c.getPos()==0){
-                  for (int i = 0; i < c.getCities().size(); i++) {
-                      StringBuilder sb = new StringBuilder();
-                      sb.append(number);
-                      sb.append(": ");
-                      sb.append(c.getCities().get(i));
-                      sb.append(" ");
-                      sbList.add(sb);
-                  }
+        HashMap<Integer, List<String>> positionCity = getPositionsOfCities(combos);
 
+        return getCityLists(positionCity, cleanNumber, number);
+    }
+
+    /**
+     * Gets lists of cities combined for position 0
+     */
+    public List<String> getCityLists(HashMap<Integer, List<String>> positionCity, final String cleanNumber, String number) {
+        List<List<String>> tmpResults = new ArrayList<>();
+
+        positionCity.forEach((k, v) -> {
+            if (positionCity.containsKey(0)) {
+                if (k == 0) {
+                    v.forEach(val -> {
+                        List<String> numberStr = new ArrayList<>();
+                        numberStr.add(val);
+                        tmpResults.add(numberStr);
+                    });
+                }
+            } else {
+                List<String> numberStr = new ArrayList<>();
+                numberStr.add(cleanNumber.substring(0, 1));
+                tmpResults.add(numberStr);
+            }
+        });
+
+
+        tmpResults.forEach(tr -> {
+
+            if (tr.get(0).length() != cleanNumber.length()) {
+
+                positionCity.forEach((k, v) -> {
+                    if (k != 0) {
+                        tr.addAll(v);
+                    }
+
+                });
+            }
+        });
+
+        return createStrings(tmpResults, number, cleanNumber);
+
+    }
+
+    private List<String> createStrings(List<List<String>> tmpResults, final String number, final String cleanNumber) {
+
+        List<String> res = new ArrayList<>();
+
+
+        tmpResults = tmpResults.stream()
+                .filter(tr -> !tr.isEmpty())
+                .collect(Collectors.toList());
+
+
+        tmpResults.forEach(tr -> {
+            StringBuilder sb = new StringBuilder();
+            sb.append(number);
+            sb.append(": ");
+            sb.append(tr.get(0));
+
+            if (!codeCheck('"', tr.get(0))) {
+                if (cleanNumber.length() - tr.get(0).length() == 1) {
+                    sb.append(" ");
+                    sb.append(cleanNumber.substring(cleanNumber.length() - 1, cleanNumber.length()));
+                    res.add(sb.toString());
+                }
+            } else if (cleanNumber.length() - tr.get(0).length() - 1 == 1) {
+                sb.append(" ");
+                sb.append(cleanNumber.substring(cleanNumber.length() - 1, cleanNumber.length()));
+                res.add(sb.toString());
+            }
+
+            if (tr.size() > 1) {
+                int overallLen = tr.get(0).length();
+                for (int i = 1; i < tr.size(); i++) {
+                    if (!codeCheck('"', tr.get(i))) {
+                        overallLen += tr.get(i).length();
+                    } else {
+                        overallLen += tr.get(i).length() - 1;
+                    }
+                    if (encodedDictionary.containsKey(tr.get(i - 1))) {
+                        if (!encodedDictionary.get(tr.get(i - 1)).contains(tr.get(i))) {
+                            if (!codeCheck(tr.get(i).charAt(0), tr.get(i - 1))) {
+                                if (overallLen == cleanNumber.length()) {
+                                    sb.append(" ");
+                                    sb.append(tr.get(i));
+                                    sb.append(" ");
+                                    res.add(sb.toString());
+                                } else if (cleanNumber.length() - overallLen == 1) {
+                                    sb.append(" ");
+                                    sb.append(cleanNumber.substring(i, cleanNumber.length()));
+                                    sb.append(" ");
+                                    res.add(sb.toString());
+                                }
+                            }
+                        }
+                    }
+
+                }
             }
 
         });
 
-        sbList.forEach(sb->{
-            System.out.println(sb.toString());
-        });
+        res.forEach(System.out::println);
 
+        return res;
     }
 
     /**
@@ -147,10 +234,10 @@ public class Encoder {
 
         int window = MIN_CODE_LEN;
 
-        while (window < number.length()+1) {
-            for (int i = 0; i < number.length() - window+1; i++) {
+        while (window < number.length() + 1) {
+            for (int i = 0; i < number.length() - window + 1; i++) {
                 String combo = number.substring(i, i + window);
-                combos.add(new Combo(combo,i));
+                combos.add(new Combo(combo, i));
             }
             window++;
         }
@@ -159,17 +246,37 @@ public class Encoder {
         return combos;
     }
 
-    public Combo getCities(Combo combo){
-        List<String>cities = new ArrayList<>();
+    /**
+     * Fills each combo with corresponding cities
+     */
+    public Combo getCities(Combo combo) {
+        List<String> cities = new ArrayList<>();
 
-        encodedDictionary.forEach((k,v)->{
-           if(v.equals(combo.getCombo())){
-               cities.add(k);
-           }
+        encodedDictionary.forEach((k, v) -> {
+            if (v.equals(combo.getCombo())) {
+                cities.add(k);
+            }
         });
 
         combo.setCities(cities);
         return combo;
+    }
+
+
+    private HashMap<Integer, List<String>> getPositionsOfCities(List<Combo> combos) {
+        HashMap<Integer, List<String>> positionCity = new HashMap<>();
+
+        combos.stream().sorted((cL, cR) -> cL.getPos().compareTo(cR.getPos()))
+                .forEach(c -> positionCity.put(c.getPos(), new ArrayList<>()));
+
+
+        combos.forEach(c -> positionCity.forEach((k, v) -> {
+            if (k == c.getPos()) {
+                v.addAll(c.getCities());
+            }
+        }));
+
+        return positionCity;
     }
 
     /**

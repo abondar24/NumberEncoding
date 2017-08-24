@@ -15,8 +15,7 @@ public class NumbersEncoding {
         List<String> dictionary = util.readTextFile(DICTIONARY_FILENAME);
 
         Encoder encoder = new Encoder(numbers,dictionary);
-        List<String> encodingResults = encoder.doEncoding();
-        encodingResults.forEach(System.out::println);
+        encoder.doEncoding();
 
     }
 

@@ -6,7 +6,7 @@ import java.util.List;
 public class Combo {
 
     private String combo;
-    private int pos;
+    private Integer pos;
     private List<String> cities;
 
     public Combo(String combo, int pos) {
@@ -33,11 +33,11 @@ public class Combo {
         this.combo = combo;
     }
 
-    public int getPos() {
+    public Integer getPos() {
         return pos;
     }
 
-    public void setPos(int pos) {
+    public void setPos(Integer pos) {
         this.pos = pos;
     }
 
