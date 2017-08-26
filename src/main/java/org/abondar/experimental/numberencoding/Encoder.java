@@ -1,5 +1,7 @@
 package org.abondar.experimental.numberencoding;
 
+import org.omg.Messaging.SYNC_WITH_TRANSPORT;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -92,40 +94,30 @@ public class Encoder {
         final String cn = cleanNumber;
         List<List<String>> tmpResutls = new ArrayList<>();
 
+        System.out.println(existingCombos);
         existingCombos.forEach(ec -> {
             List<String> combos = new ArrayList<>();
             if (cn.indexOf(ec) == 0) {
                 combos.add(ec);
             }
 
-            if (!combos.isEmpty()){
+            if (!combos.isEmpty() && !ec.isEmpty()) {
                 tmpResutls.add(combos);
             }
 
         });
 
+    //    System.out.println(tmpResutls);
 
-        existingCombos.forEach(ec -> {
-            tmpResutls.forEach(tr->{
-                if (cn.indexOf(ec) > 0 && !codeCheck(ec.charAt(0),tr.get(0))) {
-                                  tr.add(ec);
-                }
-            });
-        });
+        existingCombos.forEach(ec -> tmpResutls.forEach(tr -> {
+            if (cn.indexOf(ec) > 0 && !codeCheck(ec.charAt(0), tr.get(0))) {
+                tr.add(ec);
+            }
+        }));
 
-      List <String> res = new ArrayList<>();
+        List<String> res = new ArrayList<>();
 
-      if (!tmpResutls.isEmpty()){
-          System.out.println(tmpResutls);
-          tmpResutls.forEach(tr->{
-              tr.forEach(r->{
-
-              });
-          });
-      }
-
-
-
+//        System.out.println(res);
         return new ArrayList<>();
     }
 
@@ -153,17 +145,17 @@ public class Encoder {
     /**
      * Fills each combo with corresponding cities
      */
-     public List<String> getCitiesForCombo(String combo) {
-     List<String> cities = new ArrayList<>();
+    public List<String> getCitiesForCombo(String combo) {
+        List<String> cities = new ArrayList<>();
 
-     encodedDictionary.forEach((k, v) -> {
-     if (v.equals(combo)) {
-     cities.add(k);
-     }
-     });
+        encodedDictionary.forEach((k, v) -> {
+            if (v.equals(combo)) {
+                cities.add(k);
+            }
+        });
 
-     return cities;
-     }
+        return cities;
+    }
 
 
     /**
