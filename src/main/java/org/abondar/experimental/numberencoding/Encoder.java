@@ -1,7 +1,5 @@
 package org.abondar.experimental.numberencoding;
 
-import org.omg.Messaging.SYNC_WITH_TRANSPORT;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -82,43 +80,42 @@ public class Encoder {
             cleanNumber = cleanNumber.replace("/", "");
         }
 
-        Set<String> existingCombos = new HashSet<>();
-        getNumberCombos(cleanNumber).forEach(c -> {
-            encodedDictionary.forEach((k, v) -> {
-                if (v.equals(c)) {
-                    existingCombos.add(c);
-                }
-            });
-        });
+        Set<String> existingCombos = getExistingCombos(getNumberCombos(cleanNumber));
+        List<List<String>> tmpResultsCodes = getTmpResultsCodesWithZeroPos(existingCombos, cleanNumber);
+        List<List<String>> tmpResultsCities = getTmpResultsCitisWithZeroPos(tmpResultsCodes);
 
         final String cn = cleanNumber;
-        List<List<String>> tmpResutls = new ArrayList<>();
 
-        System.out.println(existingCombos);
-        existingCombos.forEach(ec -> {
-            List<String> combos = new ArrayList<>();
-            if (cn.indexOf(ec) == 0) {
-                combos.add(ec);
-            }
 
-            if (!combos.isEmpty() && !ec.isEmpty()) {
-                tmpResutls.add(combos);
-            }
+        System.out.println(tmpResultsCodes);
+        System.out.println(tmpResultsCities);
 
-        });
-
-    //    System.out.println(tmpResutls);
-
-        existingCombos.forEach(ec -> tmpResutls.forEach(tr -> {
-            if (cn.indexOf(ec) > 0 && !codeCheck(ec.charAt(0), tr.get(0))) {
-                tr.add(ec);
-            }
-        }));
 
         List<String> res = new ArrayList<>();
 
 //        System.out.println(res);
         return new ArrayList<>();
+    }
+
+    public List<List<String>> getTmpResultsCitisWithZeroPos(List<List<String>> tmpResultsCodes) {
+
+        List<List<String>> tmpResultsCities = new ArrayList<>();
+        tmpResultsCodes.forEach(tr -> {
+            List<String> pZeroCities = getCitiesForCombo(tr.get(0));
+            if (pZeroCities.size() > 0) {
+                pZeroCities.forEach(pz -> {
+                    List<String> cityResult = new ArrayList<>();
+                    cityResult.add(pz);
+                    tmpResultsCities.add(cityResult);
+                });
+            } else {
+                List<String> cityResult = new ArrayList<>();
+                cityResult.add(tr.get(0));
+                tmpResultsCities.add(cityResult);
+            }
+
+        });
+        return tmpResultsCities;
     }
 
 
@@ -157,6 +154,55 @@ public class Encoder {
         return cities;
     }
 
+
+    public Set<String> getExistingCombos(List<String> numberCombos) {
+        Set<String> existingCombos = new HashSet<>();
+        numberCombos.forEach(c -> encodedDictionary.forEach((k, v) -> {
+            if (v.equals(c)) {
+                existingCombos.add(c);
+            }
+        }));
+
+        return existingCombos;
+    }
+
+
+    public List<List<String>> getTmpResultsCodesWithZeroPos(Set<String> existingCombos, final String cleanNumber) {
+        List<List<String>> tmpResults = new ArrayList<>();
+
+        existingCombos.forEach(ec -> {
+            List<String> zeroPos = new ArrayList<>();
+            if (cleanNumber.indexOf(ec) == 0) {
+                zeroPos.add(ec);
+            }
+            if (!zeroPos.isEmpty()) {
+                tmpResults.add(zeroPos);
+            } else {
+                String fromNum = cleanNumber.substring(0, cleanNumber.indexOf(ec));
+
+                //if the first digit in number is in another p0 combos we don't need it
+                boolean inOtherCombo = existingCombos.stream()
+                        .anyMatch(e -> e.contains(fromNum.subSequence(0, fromNum.length())));
+
+                if (fromNum.length() < MIN_CODE_LEN && !inOtherCombo) {
+                    zeroPos.add(fromNum);
+                    tmpResults.add(zeroPos);
+                }
+            }
+
+        });
+
+        existingCombos.forEach(ec -> tmpResults.forEach(tr -> {
+
+            if (cleanNumber.indexOf(ec) != 0 && !codeCheck(ec.charAt(0), tr.get(0))) {
+
+                tr.add(ec);
+            }
+
+        }));
+
+        return tmpResults;
+    }
 
     /**
      * According to the task
