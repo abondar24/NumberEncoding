@@ -81,42 +81,18 @@ public class Encoder {
         }
 
         Set<String> existingCombos = getExistingCombos(getNumberCombos(cleanNumber));
-        List<List<String>> tmpResultsCodes = getTmpResultsCodesWithZeroPos(existingCombos, cleanNumber);
-        List<List<String>> tmpResultsCities = getTmpResultsCitisWithZeroPos(tmpResultsCodes);
 
-        final String cn = cleanNumber;
+        TreeMap<Integer,List<String>> posCity = convertExistingCombosToCities(existingCombos,cleanNumber);
+        List<String> results = new ArrayList<>();
 
-
-        System.out.println(tmpResultsCodes);
-        System.out.println(tmpResultsCities);
+        System.out.println(posCity);
 
 
-        List<String> res = new ArrayList<>();
 
-//        System.out.println(res);
+      //  System.out.println(results);
         return new ArrayList<>();
     }
 
-    public List<List<String>> getTmpResultsCitisWithZeroPos(List<List<String>> tmpResultsCodes) {
-
-        List<List<String>> tmpResultsCities = new ArrayList<>();
-        tmpResultsCodes.forEach(tr -> {
-            List<String> pZeroCities = getCitiesForCombo(tr.get(0));
-            if (pZeroCities.size() > 0) {
-                pZeroCities.forEach(pz -> {
-                    List<String> cityResult = new ArrayList<>();
-                    cityResult.add(pz);
-                    tmpResultsCities.add(cityResult);
-                });
-            } else {
-                List<String> cityResult = new ArrayList<>();
-                cityResult.add(tr.get(0));
-                tmpResultsCities.add(cityResult);
-            }
-
-        });
-        return tmpResultsCities;
-    }
 
 
     /**
@@ -167,41 +143,22 @@ public class Encoder {
     }
 
 
-    public List<List<String>> getTmpResultsCodesWithZeroPos(Set<String> existingCombos, final String cleanNumber) {
-        List<List<String>> tmpResults = new ArrayList<>();
-
-        existingCombos.forEach(ec -> {
-            List<String> zeroPos = new ArrayList<>();
-            if (cleanNumber.indexOf(ec) == 0) {
-                zeroPos.add(ec);
-            }
-            if (!zeroPos.isEmpty()) {
-                tmpResults.add(zeroPos);
-            } else {
-                String fromNum = cleanNumber.substring(0, cleanNumber.indexOf(ec));
-
-                //if the first digit in number is in another p0 combos we don't need it
-                boolean inOtherCombo = existingCombos.stream()
-                        .anyMatch(e -> e.contains(fromNum.subSequence(0, fromNum.length())));
-
-                if (fromNum.length() < MIN_CODE_LEN && !inOtherCombo) {
-                    zeroPos.add(fromNum);
-                    tmpResults.add(zeroPos);
-                }
-            }
-
+    public TreeMap<Integer, List<String>> convertExistingCombosToCities(Set<String>existingCombos, String cleanNumber) {
+        TreeMap<Integer,List<String>> posCity = new TreeMap<>();
+        existingCombos.forEach(ec-> {
+            int pos = cleanNumber.indexOf(ec);
+            posCity.put(pos,new ArrayList<>());
         });
 
-        existingCombos.forEach(ec -> tmpResults.forEach(tr -> {
-
-            if (cleanNumber.indexOf(ec) != 0 && !codeCheck(ec.charAt(0), tr.get(0))) {
-
-                tr.add(ec);
-            }
-
-        }));
-
-        return tmpResults;
+        existingCombos.forEach(ec-> {
+                int pos = cleanNumber.indexOf(ec);
+                posCity.forEach((k, v) -> {
+                    if (pos == k) {
+                        v.addAll(getCitiesForCombo(ec));
+                    }
+                });
+        });
+        return posCity;
     }
 
     /**
@@ -219,7 +176,6 @@ public class Encoder {
      */
     private int calcMinCodeLen(List<String> dictionary) {
         List<Integer> len = dictionary.stream().map(String::length).collect(Collectors.toList());
-
         return Collections.min(len);
     }
 
