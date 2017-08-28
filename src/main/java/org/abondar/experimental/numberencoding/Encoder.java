@@ -82,17 +82,52 @@ public class Encoder {
 
         Set<String> existingCombos = getExistingCombos(getNumberCombos(cleanNumber));
 
-        TreeMap<Integer,List<String>> posCity = convertExistingCombosToCities(existingCombos,cleanNumber);
+        TreeMap<Integer, List<String>> posCity = convertExistingCombosToCities(existingCombos, cleanNumber);
+
+        List<List<String>> tmpResults = new ArrayList<>();
+
+        posCity.forEach((k, v) -> {
+            fillTmpResults(tmpResults, v);
+        });
+
         List<String> results = new ArrayList<>();
 
+
         System.out.println(posCity);
+        System.out.println(tmpResults);
 
 
-
-      //  System.out.println(results);
+        //  System.out.println(results);
         return new ArrayList<>();
     }
 
+    private void fillTmpResults(List<List<String>> tmpResults, List<String> cities) {
+        List<List<String>> res = new ArrayList<>();
+        if (tmpResults.isEmpty()) {
+            cities.forEach(c -> {
+                List<String> tCities = new ArrayList<>();
+                tCities.add(c);
+                tmpResults.add(tCities);
+            });
+
+            return;
+        }
+
+        cities.forEach(c -> {
+            tmpResults.forEach(l -> {
+                List<String> tCities = new ArrayList<>();
+                tCities.addAll(l);
+                if (!codeCheck(encodedDictionary.get(c).charAt(0), encodedDictionary.get(l.get(l.size() - 1)))) {
+
+                    tCities.add(c);
+                }
+                res.add(tCities);
+            });
+
+        });
+        tmpResults.clear();
+        tmpResults.addAll(res);
+    }
 
 
     /**
@@ -143,20 +178,20 @@ public class Encoder {
     }
 
 
-    public TreeMap<Integer, List<String>> convertExistingCombosToCities(Set<String>existingCombos, String cleanNumber) {
-        TreeMap<Integer,List<String>> posCity = new TreeMap<>();
-        existingCombos.forEach(ec-> {
+    public TreeMap<Integer, List<String>> convertExistingCombosToCities(Set<String> existingCombos, String cleanNumber) {
+        TreeMap<Integer, List<String>> posCity = new TreeMap<>();
+        existingCombos.forEach(ec -> {
             int pos = cleanNumber.indexOf(ec);
-            posCity.put(pos,new ArrayList<>());
+            posCity.put(pos, new ArrayList<>());
         });
 
-        existingCombos.forEach(ec-> {
-                int pos = cleanNumber.indexOf(ec);
-                posCity.forEach((k, v) -> {
-                    if (pos == k) {
-                        v.addAll(getCitiesForCombo(ec));
-                    }
-                });
+        existingCombos.forEach(ec -> {
+            int pos = cleanNumber.indexOf(ec);
+            posCity.forEach((k, v) -> {
+                if (pos == k) {
+                    v.addAll(getCitiesForCombo(ec));
+                }
+            });
         });
         return posCity;
     }
