@@ -5,10 +5,17 @@ Task description
 
 
 The following mapping from letters to digits is given:
+- E e - 0
+- J N Q j n q - 1
+- R W X r w x - 2
+- D S Y d s y - 3
+- F T f t - 4
+- A M a m - 5
+- C I V c i v - 6
+- B K U b k u - 7
+- L O P l o p - 8
+- G H Z g h z - 9
 
-E | J N Q | R W X | D S Y | F T | A M | C I V | B K U | L O P | G H Z
-e | j n q | r w x | d s y | f t | a m | c i v | b k u | l o p | g h z
-0 |   1   |   2   |   3   |  4  |  5  |   6   |   7   |   8   |   9
 
 We want to use this mapping for encoding telephone numbers by words, so
 that it becomes easier to remember the numbers.
@@ -50,7 +57,7 @@ resolved by the following example. (Still remaining ambiguities are
 intended degrees of freedom.)
 
 Sample dictionary:
-
+````
 an
 blau
 Bo"
@@ -74,9 +81,10 @@ so
 Tor
 Torf
 Wasser
+```
 
 Sample phone number list:
-
+```
 112
 5624-82
 4824
@@ -85,8 +93,9 @@ Sample phone number list:
 1078-913-5
 381482
 04824
-
+```
 Corresponding correct program output (on screen):
+```
 5624-82: mir Tor
 5624-82: Mix Tor
 4824: Torf
@@ -99,7 +108,7 @@ Corresponding correct program output (on screen):
 04824: 0 Torf
 04824: 0 fort
 04824: 0 Tor 4
-
+```
 Any other output would be wrong (except for different ordering of the
 lines).
 
@@ -125,8 +134,8 @@ number, and
 
 Quantitative requirements
 
-Length of the individual words in the dictionary: 50 characters maximum.
-Number of words in the dictionary: 75000 maximum
-Length of the phone numbers: 50 characters maximum.
-Number of entries in the phone number file: unlimited.
+- Length of the individual words in the dictionary: 50 characters maximum.
+- Number of words in the dictionary: 75000 maximum
+- Length of the phone numbers: 50 characters maximum.
+- Number of entries in the phone number file: unlimited.
 
