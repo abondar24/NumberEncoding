@@ -56,8 +56,8 @@ allowed. All remaining ambiguities in this specification will be
 resolved by the following example. (Still remaining ambiguities are
 intended degrees of freedom.)
 
-Sample dictionary:
-````
+**Sample dictionary:**
+```
 an
 blau
 Bo"
@@ -83,7 +83,7 @@ Torf
 Wasser
 ```
 
-Sample phone number list:
+**Sample phone number list:**
 ```
 112
 5624-82
@@ -94,7 +94,7 @@ Sample phone number list:
 381482
 04824
 ```
-Corresponding correct program output (on screen):
+**Corresponding correct program output (on screen):***
 ```
 5624-82: mir Tor
 5624-82: Mix Tor
