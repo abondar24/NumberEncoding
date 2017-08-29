@@ -45,7 +45,6 @@ public class Encoder {
         });
     }
 
-
     /**
      * Code cities from dictionary into numbers
      */
@@ -86,20 +85,45 @@ public class Encoder {
 
         List<List<String>> tmpResults = new ArrayList<>();
 
-        posCity.forEach((k, v) -> {
-            fillTmpResults(tmpResults, v);
+        posCity.forEach((k, v) -> fillTmpResults(tmpResults, v));
+
+        if (!tmpResults.isEmpty()) {
+            addMissingDigitsToTmp(tmpResults, cleanNumber);
+
+            return convertTmpResultsToResults(tmpResults, number);
+        } else return new ArrayList<>();
+    }
+
+    public Set<String> getExistingCombos(List<String> numberCombos) {
+        Set<String> existingCombos = new HashSet<>();
+        numberCombos.forEach(c -> encodedDictionary.forEach((k, v) -> {
+            if (v.equals(c)) {
+                existingCombos.add(c);
+            }
+        }));
+
+        return existingCombos;
+    }
+
+
+    public TreeMap<Integer, List<String>> convertExistingCombosToCities(Set<String> existingCombos, String cleanNumber) {
+        TreeMap<Integer, List<String>> posCity = new TreeMap<>();
+        existingCombos.forEach(ec -> {
+            int pos = cleanNumber.indexOf(ec);
+            posCity.put(pos, new ArrayList<>());
         });
 
-        List<String> results = new ArrayList<>();
-
-
-        System.out.println(posCity);
-        System.out.println(tmpResults);
-
-
-        //  System.out.println(results);
-        return new ArrayList<>();
+        existingCombos.forEach(ec -> {
+            int pos = cleanNumber.indexOf(ec);
+            posCity.forEach((k, v) -> {
+                if (pos == k) {
+                    v.addAll(getCitiesForCombo(ec));
+                }
+            });
+        });
+        return posCity;
     }
+
 
     private void fillTmpResults(List<List<String>> tmpResults, List<String> cities) {
         List<List<String>> res = new ArrayList<>();
@@ -113,20 +137,88 @@ public class Encoder {
             return;
         }
 
-        cities.forEach(c -> {
-            tmpResults.forEach(l -> {
-                List<String> tCities = new ArrayList<>();
-                tCities.addAll(l);
-                if (!codeCheck(encodedDictionary.get(c).charAt(0), encodedDictionary.get(l.get(l.size() - 1)))) {
+        cities.forEach(c -> tmpResults.forEach(l -> {
+            List<String> tCities = new ArrayList<>();
+            tCities.addAll(l);
+            if (!codeCheck(encodedDictionary.get(c).charAt(0), encodedDictionary.get(l.get(l.size() - 1)))) {
 
-                    tCities.add(c);
-                }
-                res.add(tCities);
-            });
-
-        });
+                tCities.add(c);
+            }
+            res.add(tCities);
+        }));
         tmpResults.clear();
         tmpResults.addAll(res);
+    }
+
+    private void addMissingDigitsToTmp(List<List<String>> tmpResults, String cleanNumber) {
+        List<List<String>> res = new ArrayList<>();
+
+        res.addAll(tmpResults);
+        res.forEach(tr -> {
+            List<String> combos = new ArrayList<>();
+            tr.forEach(city -> combos.add(encodedDictionary.get(city)));
+
+            int overalLen = combos.stream().mapToInt(String::length).sum();
+            if (overalLen != cleanNumber.length()) {
+                List<String> newTr = calcDiff(cleanNumber, tr);
+                if (!newTr.isEmpty())
+                tr.clear();
+                tr.addAll(newTr);
+            }
+        });
+
+        tmpResults.clear();
+        tmpResults.addAll(res);
+
+    }
+
+    private List<String> convertTmpResultsToResults(List<List<String>> tmpResults, String number) {
+        List<String> results = new ArrayList<>();
+
+        tmpResults.forEach(tr -> {
+            StringBuilder sb = new StringBuilder();
+            sb.append(number);
+            sb.append(": ");
+            tr.forEach(city -> {
+                sb.append(city);
+                if (!city.equals(tr.get(tr.size() - 1))) {
+                    sb.append(" ");
+                }
+            });
+
+            results.add(sb.toString());
+        });
+
+        return results;
+    }
+
+    private List<String> calcDiff(String cleanNumber, List<String> cityList) {
+        List<String> res = new ArrayList<>();
+
+        String ost = cleanNumber;
+
+        boolean cleanRes = false;
+        for (String city : cityList) {
+            String combo = encodedDictionary.get(city);
+            int pos = ost.indexOf(combo);
+            if (pos > 0) {
+                if (pos == 1) {
+                    res.add(ost.substring(0, pos));
+                }
+            }
+            res.add(city);
+
+            ost = ost.substring(pos + combo.length(), ost.length());
+            if (pos > 1) cleanRes = true;
+
+        }
+
+        if (ost.length() == 1) {
+            res.add(ost);
+        }
+
+        if (cleanRes) res.clear();
+        return res;
     }
 
 
@@ -165,36 +257,6 @@ public class Encoder {
         return cities;
     }
 
-
-    public Set<String> getExistingCombos(List<String> numberCombos) {
-        Set<String> existingCombos = new HashSet<>();
-        numberCombos.forEach(c -> encodedDictionary.forEach((k, v) -> {
-            if (v.equals(c)) {
-                existingCombos.add(c);
-            }
-        }));
-
-        return existingCombos;
-    }
-
-
-    public TreeMap<Integer, List<String>> convertExistingCombosToCities(Set<String> existingCombos, String cleanNumber) {
-        TreeMap<Integer, List<String>> posCity = new TreeMap<>();
-        existingCombos.forEach(ec -> {
-            int pos = cleanNumber.indexOf(ec);
-            posCity.put(pos, new ArrayList<>());
-        });
-
-        existingCombos.forEach(ec -> {
-            int pos = cleanNumber.indexOf(ec);
-            posCity.forEach((k, v) -> {
-                if (pos == k) {
-                    v.addAll(getCitiesForCombo(ec));
-                }
-            });
-        });
-        return posCity;
-    }
 
     /**
      * According to the task
