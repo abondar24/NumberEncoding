@@ -11,11 +11,11 @@ public class Encoder {
     private HashMap<Integer, String> codes;
 
     private List<String> numbers;
-    private List<String> dictionary;
     private HashMap<String, String> encodedDictionary;
     private int MIN_CODE_LEN;
 
-    public Encoder(List<String> numbers, List<String> dictionary) {
+
+    public Encoder() {
         codes = new HashMap<>();
         codes.put(0, "e");
         codes.put(1, "jnq");
@@ -28,11 +28,15 @@ public class Encoder {
         codes.put(8, "lop");
         codes.put(9, "ghz");
 
-        this.numbers = numbers;
-        this.dictionary = dictionary;
-        this.encodedDictionary = encodeDictionary(this.dictionary);
-        this.MIN_CODE_LEN = calcMinCodeLen(dictionary);
 
+    }
+
+    public void prepareToEncoding(String inputFile, String dictionaryFile) {
+        this.numbers = ReadingUtil.readTextFile(inputFile);
+        List<String> dictionary = ReadingUtil.readTextFile(dictionaryFile);
+
+        this.encodedDictionary = encodeDictionary(dictionary);
+        this.MIN_CODE_LEN = calcMinCodeLen(dictionary);
     }
 
 
@@ -106,7 +110,7 @@ public class Encoder {
     }
 
 
-    public TreeMap<Integer, List<String>> convertExistingCombosToCities(Set<String> existingCombos, String cleanNumber) {
+    private TreeMap<Integer, List<String>> convertExistingCombosToCities(Set<String> existingCombos, String cleanNumber) {
         TreeMap<Integer, List<String>> posCity = new TreeMap<>();
         existingCombos.forEach(ec -> {
             int pos = cleanNumber.indexOf(ec);
@@ -162,7 +166,7 @@ public class Encoder {
             if (overalLen != cleanNumber.length()) {
                 List<String> newTr = calcDiff(cleanNumber, tr);
                 if (!newTr.isEmpty())
-                tr.clear();
+                    tr.clear();
                 tr.addAll(newTr);
             }
         });
@@ -192,7 +196,7 @@ public class Encoder {
         return results;
     }
 
-    private List<String> calcDiff(String cleanNumber, List<String> cityList) {
+    public List<String> calcDiff(String cleanNumber, List<String> cityList) {
         List<String> res = new ArrayList<>();
 
         String ost = cleanNumber;
