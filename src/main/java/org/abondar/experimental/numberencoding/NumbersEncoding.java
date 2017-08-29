@@ -9,10 +9,8 @@ public class NumbersEncoding {
     private static String DICTIONARY_FILENAME = "test_dictionary.txt";
 
     public static void main(String[] args) {
-        ReadingUtil util = new ReadingUtil();
-
-        List<String> numbers = util.readTextFile(NUMBERS_FILENAME);
-        List<String> dictionary = util.readTextFile(DICTIONARY_FILENAME);
+        List<String> numbers = ReadingUtil.readTextFile(NUMBERS_FILENAME);
+        List<String> dictionary = ReadingUtil.readTextFile(DICTIONARY_FILENAME);
 
         Encoder encoder = new Encoder(numbers,dictionary);
         encoder.doEncoding();

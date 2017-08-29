@@ -12,10 +12,10 @@ import java.util.List;
 public class ReadingUtil {
 
     // needs to be slightly changed if we want to remove commons-io
-    public  List<String> readTextFile(String fileName){
+    public  static List<String> readTextFile(String fileName){
         List<String> data = new ArrayList<>();
         try {
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
+            InputStream inputStream = ReadingUtil.class.getClassLoader().getResourceAsStream(fileName);
             data = IOUtils.readLines(inputStream, "UTF-8");
         } catch (IOException e){
             System.err.println(e.getMessage());
