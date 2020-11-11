@@ -22,7 +22,7 @@ that it becomes easier to remember the numbers.
 
 Functional requirements
 
-Your task is writing a program that finds, for a given phone number, all
+The task is writing a program that finds, for a given phone number, all
 possible encodings by words, and prints them. A phone number is an
 arbitrary(!) string of dashes - , slashes / and digits. The dashes and
 slashes will not be encoded. The words are taken from a dictionary which
@@ -49,7 +49,7 @@ currently covers k digits, digit k+1 is encoded by itself if and only if,
 first, digit k was not encoded by a digit and, second, there is no word
 in the dictionary that can be used in the encoding starting at digit k+1.
 
-Your program must work on a series of phone numbers; for each encoding
+The program must work on a series of phone numbers; for each encoding
 that it finds, it must print the phone number followed by a colon, a
 single(!) space, and the encoding on one line; trailing spaces are not
 allowed. All remaining ambiguities in this specification will be
@@ -139,3 +139,10 @@ Quantitative requirements
 - Length of the phone numbers: 50 characters maximum.
 - Number of entries in the phone number file: unlimited.
 
+### Build and run
+
+```yaml
+mvn clean install
+
+java -jar <jar-location>/encoder.jar
+```
